@@ -1,0 +1,8 @@
+course_code,section_name,teacher_code,expected_size,needs
+MA101,AE-1Y,T001,55,Projector
+CS101,AE-1Y,T002,55,PC;Projector
+PH101,AE-1Y,T003,55,Equipment
+MA101,CE-1Y,T001,60,Projector
+CS101,CE-1Y,T002,60,PC;Projector
+CH101,AE-2Y,T003,45,
+ME101,CE-2Y,T001,50,Projector

@@ -1,0 +1,6 @@
+code,capacity,kind,tags
+NC241,60,CLASS,Projector;AC
+NC242,60,CLASS,Projector
+NC343,40,CLASS,Board
+CSE101,30,LAB,PC;Projector
+EE201,25,LAB,Equipment;AC

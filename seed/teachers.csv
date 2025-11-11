@@ -1,0 +1,4 @@
+code,name,max_per_day,max_per_week,prefs
+T001,Dr. Rajesh Kumar,3,12,"{""avoid_8am"": true, ""prefer_days"": [""TUE"",""THU""]}"
+T002,Prof. Anjali Sharma,4,15,"{""avoid_late"": true}"
+T003,Dr. Vikram Singh,3,12,"{""prefer_days"": [""MON"",""WED"",""FRI""]}"
