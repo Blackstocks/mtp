@@ -101,25 +101,25 @@ export default function CoursesPage() {
   const getTotalHours = (course: Course) => course.L + course.T + course.P
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Courses</h1>
+    <div className="container mx-auto p-2 md:p-3 lg:p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Courses</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingCourse(null)}>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button size="sm" onClick={() => setEditingCourse(null)} className="bg-black text-white hover:bg-gray-800">
+              <Plus className="mr-1 h-3 w-3" />
               Add Course
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg">
                 {editingCourse ? 'Edit Course' : 'Add New Course'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="code">Course Code</Label>
+                <Label htmlFor="code" className="text-sm">Course Code</Label>
                 <Input
                   id="code"
                   name="code"
@@ -129,7 +129,7 @@ export default function CoursesPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="name">Course Name</Label>
+                <Label htmlFor="name" className="text-sm">Course Name</Label>
                 <Input
                   id="name"
                   name="name"
@@ -140,7 +140,7 @@ export default function CoursesPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="L">Lecture Hours (L)</Label>
+                  <Label htmlFor="L" className="text-sm">Lecture Hours (L)</Label>
                   <Input
                     id="L"
                     name="L"
@@ -151,7 +151,7 @@ export default function CoursesPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="T">Tutorial Hours (T)</Label>
+                  <Label htmlFor="T" className="text-sm">Tutorial Hours (T)</Label>
                   <Input
                     id="T"
                     name="T"
@@ -162,7 +162,7 @@ export default function CoursesPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="P">Practical Hours (P)</Label>
+                  <Label htmlFor="P" className="text-sm">Practical Hours (P)</Label>
                   <Input
                     id="P"
                     name="P"
@@ -174,10 +174,10 @@ export default function CoursesPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button size="sm" type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button size="sm" type="submit" className="bg-black text-white hover:bg-gray-800">
                   {editingCourse ? 'Update' : 'Create'}
                 </Button>
               </div>
@@ -186,49 +186,51 @@ export default function CoursesPage() {
         </Dialog>
       </div>
       
-      <Card>
+      <Card className="border border-gray-200">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>L-T-P</TableHead>
-                <TableHead>Total Hours</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-xs">Code</TableHead>
+                <TableHead className="text-xs">Name</TableHead>
+                <TableHead className="text-xs">L-T-P</TableHead>
+                <TableHead className="text-xs">Total Hours</TableHead>
+                <TableHead className="text-xs">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {coursesList.map(course => (
                 <TableRow key={course.id}>
-                  <TableCell className="font-mono">{course.code}</TableCell>
-                  <TableCell>{course.name}</TableCell>
+                  <TableCell className="font-mono text-xs">{course.code}</TableCell>
+                  <TableCell className="text-xs">{course.name}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {course.L > 0 && <Badge variant="default">L: {course.L}</Badge>}
-                      {course.T > 0 && <Badge variant="secondary">T: {course.T}</Badge>}
-                      {course.P > 0 && <Badge variant="outline">P: {course.P}</Badge>}
+                      {course.L > 0 && <Badge variant="outline" className="text-xs border-gray-300">L: {course.L}</Badge>}
+                      {course.T > 0 && <Badge variant="outline" className="text-xs border-gray-300">T: {course.T}</Badge>}
+                      {course.P > 0 && <Badge variant="outline" className="text-xs border-gray-300">P: {course.P}</Badge>}
                     </div>
                   </TableCell>
-                  <TableCell>{getTotalHours(course)}</TableCell>
+                  <TableCell className="text-xs">{getTotalHours(course)}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-gray-100"
                         onClick={() => {
                           setEditingCourse(course)
                           setIsDialogOpen(true)
                         }}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-gray-100"
                         onClick={() => deleteMutation.mutate(course.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>

@@ -54,7 +54,9 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: #ffffff;
+    min-height: 100vh;
   }
 }
 
@@ -87,5 +89,62 @@
   
   .animate-slide-in {
     animation: slide-in 200ms ease-out;
+  }
+
+  /* Black and white theme classes */
+  .bg-primary {
+    background: #000000;
+  }
+  
+  .bg-secondary {
+    background: #ffffff;
+  }
+  
+  .text-primary-inverse {
+    color: #ffffff;
+  }
+
+  /* Remove all gradients - use solid colors instead */
+  .gradient-primary {
+    background: #000000;
+  }
+  
+  .gradient-secondary {
+    background: #f5f5f5;
+  }
+  
+  .gradient-success {
+    background: #000000;
+  }
+  
+  .gradient-card {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  
+  .gradient-dark {
+    background: #000000;
+  }
+
+  .text-gradient {
+    color: #000000;
+    font-weight: 700;
+  }
+
+  .shadow-elegant {
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 5px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-elegant-lg {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.06);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 }

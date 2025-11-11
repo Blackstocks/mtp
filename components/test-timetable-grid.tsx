@@ -25,14 +25,14 @@ function TestCard({ assignment, onToggleLock, onShowRecommendations }: {
   onShowRecommendations: () => void
 }) {
   const kindColors = {
-    'L': 'bg-blue-100 text-blue-800 border-blue-300',
-    'T': 'bg-green-100 text-green-800 border-green-300',
-    'P': 'bg-purple-100 text-purple-800 border-purple-300'
+    'L': 'bg-black',
+    'T': 'bg-gray-800',
+    'P': 'bg-gray-600'
   }
 
   return (
     <Card 
-      className={`p-2 ${kindColors[assignment.kind]} border-2 hover:shadow-lg hover:scale-105 transition-all cursor-pointer active:scale-95`}
+      className={`p-2 ${kindColors[assignment.kind]} text-white border-0 hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer active:scale-95`}
       onMouseDown={(e) => {
         // If not clicking on a button or the lock icon
         const target = e.target as HTMLElement
@@ -44,10 +44,10 @@ function TestCard({ assignment, onToggleLock, onShowRecommendations }: {
         }
       }}
     >
-      <div className="text-xs font-semibold">{assignment.offering?.course?.code}</div>
-      <div className="text-xs">{assignment.offering?.teacher?.name}</div>
-      <div className="flex justify-between items-center mt-1">
-        <Badge variant="outline" className="text-xs">{assignment.kind}</Badge>
+      <div className="text-xs font-bold">{assignment.offering?.course?.code}</div>
+      <div className="text-[10px] opacity-90">{assignment.offering?.teacher?.name}</div>
+      <div className="flex justify-between items-center mt-2">
+        <Badge variant="secondary" className="text-[10px] bg-white/20 text-white border-0">{assignment.kind}</Badge>
         <button
           type="button"
           onClick={(e) => {
@@ -57,10 +57,10 @@ function TestCard({ assignment, onToggleLock, onShowRecommendations }: {
           }}
           className="p-1"
         >
-          {assignment.is_locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3 text-gray-400" />}
+          {assignment.is_locked ? <Lock className="h-3 w-3 text-white" /> : <Unlock className="h-3 w-3 text-white/70" />}
         </button>
       </div>
-      <div className="text-xs text-gray-600">{assignment.room?.code}</div>
+      <div className="text-[10px] text-white/80 mt-1">{assignment.room?.code || 'No room'}</div>
     </Card>
   )
 }
@@ -112,20 +112,22 @@ export function TestTimetableGrid({
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl">
         <table className="min-w-full border-collapse">
           <thead>
             <tr>
-              <th className="border p-2 bg-gray-50">Time</th>
+              <th className="p-2 bg-black text-white font-bold text-xs first:rounded-tl-xl">Time</th>
               {days.map(day => (
-                <th key={day} className="border p-2 bg-gray-50 min-w-[150px]">{day}</th>
+                <th key={day} className="p-2 bg-black text-white font-bold text-xs min-w-[140px] last:rounded-tr-xl">{day}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {times.map(time => (
-              <tr key={time}>
-                <td className="border p-2 font-mono text-sm bg-gray-50">{formatTime(time)}</td>
+            {times.map((time, timeIdx) => (
+              <tr key={time} className="hover:bg-gray-50 transition-colors">
+                <td className="border border-gray-300 p-1 font-mono text-xs bg-gray-100 font-semibold text-black">
+                  {formatTime(time)}
+                </td>
                 {days.map(day => {
                   const slotsAtTime = slotGrid[`${day}-${time}`] || []
                   const slotAssignments = filteredAssignments.filter(a =>
@@ -133,7 +135,7 @@ export function TestTimetableGrid({
                   )
                   
                   return (
-                    <td key={day} className="border p-2">
+                    <td key={day} className="border border-gray-200 p-1 bg-white">
                       {slotsAtTime.map((slot) => (
                         <DroppableSlot key={slot.id} slot={slot}>
                           {slotAssignments
@@ -175,14 +177,14 @@ function DroppableSlot({ slot, children }: { slot: Slot; children: React.ReactNo
     <div
       ref={setNodeRef}
       className={`
-        border-2 rounded p-2 min-h-[100px] space-y-1
-        ${isOver ? 'bg-blue-50 border-blue-400' : ''}
-        ${slot.is_lab ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200'}
+        border-2 rounded-lg p-2 min-h-[100px] space-y-1 transition-all duration-200
+        ${isOver ? 'bg-gray-100 border-black shadow-lg scale-105' : ''}
+        ${slot.is_lab ? 'bg-gray-50 border-gray-400' : 'bg-white border-gray-200'}
       `}
     >
-      <div className="text-xs font-semibold mb-1">
+      <div className="text-[10px] font-semibold mb-1">
         {slot.code}{slot.occ}
-        {slot.is_lab && <Badge variant="outline" className="text-xs ml-2">LAB</Badge>}
+        {slot.is_lab && <Badge variant="outline" className="text-[10px] ml-1">LAB</Badge>}
       </div>
       {children}
     </div>
@@ -207,6 +209,8 @@ function DraggableItem({
   const style = {
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+    position: isDragging ? 'relative' : 'static',
   }
 
   return (

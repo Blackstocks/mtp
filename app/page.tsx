@@ -17,9 +17,9 @@ export default function HomePage() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
-            <Users className="h-10 w-10 mb-2" />
+            <Users className="h-8 w-8 mb-2" />
             <CardTitle>Teacher Management</CardTitle>
             <CardDescription>
               Manage faculty availability and preferences
@@ -27,9 +27,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
-            <School className="h-10 w-10 mb-2" />
+            <School className="h-8 w-8 mb-2" />
             <CardTitle>Course Offerings</CardTitle>
             <CardDescription>
               Define courses with L-T-P structure
@@ -37,9 +37,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
-            <Clock className="h-10 w-10 mb-2" />
+            <Clock className="h-8 w-8 mb-2" />
             <CardTitle>Smart Scheduling</CardTitle>
             <CardDescription>
               AI-powered constraint optimization
@@ -47,9 +47,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
-            <Calendar className="h-10 w-10 mb-2" />
+            <Calendar className="h-8 w-8 mb-2" />
             <CardTitle>Interactive Timetable</CardTitle>
             <CardDescription>
               Drag & drop with recommendations
@@ -60,13 +60,13 @@ export default function HomePage() {
       
       <div className="text-center">
         <Link href="/admin/teachers">
-          <Button size="lg">
+          <Button size="lg" className="bg-black text-white hover:bg-gray-800">
             Go to Admin Dashboard
           </Button>
         </Link>
       </div>
       
-      <Card className="mt-10">
+      <Card className="mt-10 border border-gray-200">
         <CardHeader>
           <CardTitle>Quick Start</CardTitle>
         </CardHeader>

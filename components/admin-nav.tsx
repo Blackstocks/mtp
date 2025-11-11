@@ -61,38 +61,35 @@ export function AdminNav() {
   const pathname = usePathname()
   
   return (
-    <nav className="bg-white border-b shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <Calendar className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold">Timetable Scheduler</span>
-            </Link>
-            <div className="ml-10 flex items-baseline space-x-4">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                      isActive 
-                        ? "bg-blue-100 text-blue-700" 
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.title}
-                  </Link>
-                )
-              })}
+    <nav className="bg-white sticky top-0 z-50 border-b border-gray-200">
+      <div className="px-3">
+        <div className="flex items-center justify-between h-12">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+              <Calendar className="h-5 w-5 text-white" />
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">Admin Panel</span>
+            <span className="text-base font-bold text-black hidden md:block">Timetable</span>
+          </Link>
+          <div className="flex items-center gap-1 overflow-x-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
+                    isActive 
+                      ? "bg-black text-white shadow-md" 
+                      : "text-gray-600 hover:bg-gray-100 hover:text-black"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{item.title}</span>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>

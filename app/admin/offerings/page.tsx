@@ -118,30 +118,30 @@ export default function OfferingsPage() {
   }, {} as Record<string, OfferingWithRelations[]>)
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Course Offerings</h1>
+    <div className="container mx-auto p-2 md:p-3 lg:p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Course Offerings</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button size="sm" className="bg-black text-white hover:bg-gray-800">
+              <Plus className="mr-1 h-3 w-3" />
               Add Offering
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Offering</DialogTitle>
+              <DialogTitle className="text-lg">Add New Offering</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="course_id">Course</Label>
+                <Label htmlFor="course_id" className="text-sm">Course</Label>
                 <Select name="course_id" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8">
                     <SelectValue placeholder="Select course" />
                   </SelectTrigger>
                   <SelectContent>
                     {courses.map(course => (
-                      <SelectItem key={course.id} value={course.id}>
+                      <SelectItem key={course.id} value={course.id} className="text-xs">
                         {course.code} - {course.name}
                       </SelectItem>
                     ))}
@@ -149,14 +149,14 @@ export default function OfferingsPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="section_id">Section</Label>
+                <Label htmlFor="section_id" className="text-sm">Section</Label>
                 <Select name="section_id" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8">
                     <SelectValue placeholder="Select section" />
                   </SelectTrigger>
                   <SelectContent>
                     {sections.map(section => (
-                      <SelectItem key={section.id} value={section.id}>
+                      <SelectItem key={section.id} value={section.id} className="text-xs">
                         {section.name} ({section.program} Year {section.year})
                       </SelectItem>
                     ))}
@@ -164,15 +164,15 @@ export default function OfferingsPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="teacher_id">Teacher</Label>
+                <Label htmlFor="teacher_id" className="text-sm">Teacher</Label>
                 <Select name="teacher_id">
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8">
                     <SelectValue placeholder="Select teacher" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none" className="text-xs">None</SelectItem>
                     {teachers.map(teacher => (
-                      <SelectItem key={teacher.id} value={teacher.id}>
+                      <SelectItem key={teacher.id} value={teacher.id} className="text-xs">
                         {teacher.name} ({teacher.code})
                       </SelectItem>
                     ))}
@@ -180,7 +180,7 @@ export default function OfferingsPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="expected_size">Expected Size</Label>
+                <Label htmlFor="expected_size" className="text-sm">Expected Size</Label>
                 <Input
                   id="expected_size"
                   name="expected_size"
@@ -190,7 +190,7 @@ export default function OfferingsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="needs">Requirements (comma-separated)</Label>
+                <Label htmlFor="needs" className="text-sm">Requirements (comma-separated)</Label>
                 <Input
                   id="needs"
                   name="needs"
@@ -198,10 +198,10 @@ export default function OfferingsPage() {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button size="sm" type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">Create</Button>
+                <Button size="sm" type="submit" className="bg-black text-white hover:bg-gray-800">Create</Button>
               </div>
             </form>
           </DialogContent>
@@ -209,18 +209,18 @@ export default function OfferingsPage() {
       </div>
       
       {Object.entries(groupedOfferings).map(([group, offerings]) => (
-        <Card key={group} className="mb-6">
-          <CardContent>
-            <h2 className="text-xl font-semibold mb-4">{group}</h2>
+        <Card key={group} className="mb-4 border border-gray-200">
+          <CardContent className="p-2">
+            <h2 className="text-base font-semibold mb-3">{group}</h2>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Section</TableHead>
-                  <TableHead>Teacher</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Requirements</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-xs">Course</TableHead>
+                  <TableHead className="text-xs">Section</TableHead>
+                  <TableHead className="text-xs">Teacher</TableHead>
+                  <TableHead className="text-xs">Size</TableHead>
+                  <TableHead className="text-xs">Requirements</TableHead>
+                  <TableHead className="text-xs">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -228,26 +228,26 @@ export default function OfferingsPage() {
                   <TableRow key={offering.id}>
                     <TableCell>
                       <div>
-                        <span className="font-mono">{offering.course?.code}</span>
-                        <div className="text-sm text-gray-500">{offering.course?.name}</div>
+                        <span className="font-mono text-xs">{offering.course?.code}</span>
+                        <div className="text-xs text-gray-500">{offering.course?.name}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{offering.section?.name}</TableCell>
+                    <TableCell className="text-xs">{offering.section?.name}</TableCell>
                     <TableCell>
                       {offering.teacher ? (
                         <div>
-                          <div>{offering.teacher.name}</div>
-                          <div className="text-sm text-gray-500">{offering.teacher.code}</div>
+                          <div className="text-xs">{offering.teacher.name}</div>
+                          <div className="text-xs text-gray-500">{offering.teacher.code}</div>
                         </div>
                       ) : (
-                        <Badge variant="outline">Unassigned</Badge>
+                        <Badge variant="outline" className="text-xs border-gray-300">Unassigned</Badge>
                       )}
                     </TableCell>
-                    <TableCell>{offering.expected_size}</TableCell>
+                    <TableCell className="text-xs">{offering.expected_size}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {offering.needs.map(need => (
-                          <Badge key={need} variant="secondary">{need}</Badge>
+                          <Badge key={need} variant="outline" className="text-xs border-gray-300">{need}</Badge>
                         ))}
                       </div>
                     </TableCell>
@@ -255,9 +255,10 @@ export default function OfferingsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-gray-100"
                         onClick={() => deleteMutation.mutate(offering.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </TableCell>
                   </TableRow>

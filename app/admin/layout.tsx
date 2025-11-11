@@ -6,9 +6,9 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <AdminNav />
-      <main className="container mx-auto py-6">
+      <main>
         {children}
       </main>
     </div>

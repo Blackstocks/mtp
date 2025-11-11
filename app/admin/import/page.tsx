@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Upload, CheckCircle, AlertCircle, Download } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -181,11 +182,11 @@ export default function ImportPage() {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Complete Timetable Data
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">RECOMMENDED</span>
+              <Badge variant="outline" className="text-xs border-gray-300">RECOMMENDED</Badge>
             </CardTitle>
             <CardDescription>
               Load full IIT KGP timetable data
@@ -195,10 +196,9 @@ export default function ImportPage() {
             <Button 
               onClick={handleLoadTimetableData} 
               disabled={loading}
-              className="w-full"
-              variant="default"
+              className="w-full bg-black text-white hover:bg-gray-800"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Load Complete Data
             </Button>
             <p className="text-sm text-muted-foreground mt-4">
@@ -213,7 +213,7 @@ export default function ImportPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Quick Seed</CardTitle>
             <CardDescription>
@@ -224,10 +224,10 @@ export default function ImportPage() {
             <Button 
               onClick={handleQuickSeed} 
               disabled={loading}
-              className="w-full"
+              className="w-full border-gray-300 hover:bg-gray-100"
               variant="outline"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Load Sample Data
             </Button>
             <p className="text-sm text-muted-foreground mt-4">
@@ -242,7 +242,7 @@ export default function ImportPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Aerospace Courses</CardTitle>
             <CardDescription>
@@ -253,10 +253,10 @@ export default function ImportPage() {
             <Button 
               onClick={handleAerospaceCourses} 
               disabled={loading}
-              className="w-full"
+              className="w-full bg-gray-200 text-black hover:bg-gray-300"
               variant="secondary"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Load AE Courses
             </Button>
             <p className="text-sm text-muted-foreground mt-4">
@@ -270,7 +270,7 @@ export default function ImportPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Aerospace Teachers</CardTitle>
             <CardDescription>
@@ -281,10 +281,10 @@ export default function ImportPage() {
             <Button 
               onClick={handleAerospaceTeachers} 
               disabled={loading}
-              className="w-full"
+              className="w-full bg-gray-200 text-black hover:bg-gray-300"
               variant="secondary"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Load AE Faculty & Assignments
             </Button>
             <p className="text-sm text-muted-foreground mt-4">
@@ -298,7 +298,7 @@ export default function ImportPage() {
       </div>
       
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Step 1: Create Sections</CardTitle>
             <CardDescription>
@@ -331,10 +331,9 @@ export default function ImportPage() {
                 }
               }}
               disabled={loading}
-              className="w-full"
-              variant="destructive"
+              className="w-full bg-black text-white hover:bg-gray-800"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Create Sections
             </Button>
             <p className="text-sm text-muted-foreground mt-2">
@@ -343,7 +342,7 @@ export default function ImportPage() {
           </CardContent>
         </Card>
         
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Step 2: Create Course Offerings</CardTitle>
             <CardDescription>
@@ -376,10 +375,10 @@ export default function ImportPage() {
                 }
               }}
               disabled={loading}
-              className="w-full"
+              className="w-full bg-gray-200 text-black hover:bg-gray-300"
               variant="secondary"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Create Offerings
             </Button>
             <p className="text-sm text-muted-foreground mt-2">
@@ -388,7 +387,7 @@ export default function ImportPage() {
           </CardContent>
         </Card>
         
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>Step 3: Set Teacher Availability</CardTitle>
             <CardDescription>
@@ -421,10 +420,9 @@ export default function ImportPage() {
                 }
               }}
               disabled={loading}
-              className="w-full"
-              variant="default"
+              className="w-full bg-black text-white hover:bg-gray-800"
             >
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-3 w-3" />
               Set Availability
             </Button>
             <p className="text-sm text-muted-foreground mt-2">
@@ -435,7 +433,7 @@ export default function ImportPage() {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border border-gray-200">
           <CardHeader>
             <CardTitle>CSV Templates</CardTitle>
             <CardDescription>
@@ -443,39 +441,39 @@ export default function ImportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/teachers.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Teachers Template
               </a>
             </Button>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/rooms.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Rooms Template
               </a>
             </Button>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/courses.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Courses Template
               </a>
             </Button>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/sections.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Sections Template
               </a>
             </Button>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/offerings.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Offerings Template
               </a>
             </Button>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
               <a href="/seed/slot_matrix.csv" download>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Slot Matrix Template
               </a>
             </Button>
@@ -518,8 +516,8 @@ export default function ImportPage() {
                 <Input id="slots" name="slots" type="file" accept=".csv" />
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="w-full">
-              <Upload className="mr-2 h-4 w-4" />
+            <Button type="submit" disabled={loading} className="w-full bg-black text-white hover:bg-gray-800">
+              <Upload className="mr-2 h-3 w-3" />
               Import Files
             </Button>
           </form>
@@ -528,7 +526,7 @@ export default function ImportPage() {
       
       {results && (
         <Alert>
-          <CheckCircle className="h-4 w-4" />
+          <CheckCircle className="h-3 w-3" />
           <AlertDescription>
             <div className="font-semibold mb-2">Import Results:</div>
             <ul className="space-y-1">

@@ -154,24 +154,24 @@ export default function SlotMatrixPage() {
   const clusters = [...new Set(slotsList.filter(s => s.cluster).map(s => s.cluster))]
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Slot Matrix</h1>
+    <div className="container mx-auto p-2 md:p-3 lg:p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Slot Matrix</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadDefaultGrid}>
+          <Button size="sm" variant="outline" onClick={loadDefaultGrid} className="border-gray-300 hover:bg-gray-100">
             Load Default IIT KGP Grid
           </Button>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button size="sm" onClick={() => setIsDialogOpen(true)} className="bg-black text-white hover:bg-gray-800">
+            <Plus className="mr-1 h-3 w-3" />
             Add Slot
           </Button>
         </div>
       </div>
       
       <Tabs value={selectedDay} onValueChange={(v) => setSelectedDay(v as typeof DAYS[number])}>
-        <TabsList className="mb-4">
+        <TabsList className="mb-3 h-8">
           {DAYS.map(day => (
-            <TabsTrigger key={day} value={day}>
+            <TabsTrigger key={day} value={day} className="text-xs data-[state=active]:bg-black data-[state=active]:text-white">
               {day}
             </TabsTrigger>
           ))}
@@ -179,41 +179,41 @@ export default function SlotMatrixPage() {
         
         {DAYS.map(day => (
           <TabsContent key={day} value={day}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{day} Schedule</CardTitle>
+            <Card className="border border-gray-200">
+              <CardHeader className="p-2">
+                <CardTitle className="text-base">{day} Schedule</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-2">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Slot Code</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Cluster</TableHead>
+                      <TableHead className="text-xs">Slot Code</TableHead>
+                      <TableHead className="text-xs">Time</TableHead>
+                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs">Cluster</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {groupedSlots[day]?.sort((a, b) => a.start_time.localeCompare(b.start_time))
                       .map(slot => (
                         <TableRow key={slot.id}>
-                          <TableCell className="font-mono">
+                          <TableCell className="font-mono text-xs">
                             {slot.code}{slot.occ}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
+                            <div className="flex items-center gap-1 text-xs">
+                              <Clock className="h-3 w-3" />
                               {slot.start_time} - {slot.end_time}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={slot.is_lab ? 'default' : 'secondary'}>
+                            <Badge variant="outline" className="text-xs border-gray-300">
                               {slot.is_lab ? 'LAB' : 'LECTURE'}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             {slot.cluster && (
-                              <Badge variant="outline">{slot.cluster}</Badge>
+                              <Badge variant="outline" className="text-xs border-gray-300">{slot.cluster}</Badge>
                             )}
                           </TableCell>
                         </TableRow>
@@ -229,12 +229,12 @@ export default function SlotMatrixPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Slot</DialogTitle>
+            <DialogTitle className="text-lg">Add New Slot</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="code">Code</Label>
+                <Label htmlFor="code" className="text-sm">Code</Label>
                 <Input
                   id="code"
                   name="code"
@@ -243,7 +243,7 @@ export default function SlotMatrixPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="occ">Occurrence</Label>
+                <Label htmlFor="occ" className="text-sm">Occurrence</Label>
                 <Input
                   id="occ"
                   name="occ"
@@ -254,21 +254,21 @@ export default function SlotMatrixPage() {
               </div>
             </div>
             <div>
-              <Label htmlFor="day">Day</Label>
+              <Label htmlFor="day" className="text-sm">Day</Label>
               <Select name="day" defaultValue="MON">
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {DAYS.map(day => (
-                    <SelectItem key={day} value={day}>{day}</SelectItem>
+                    <SelectItem key={day} value={day} className="text-xs">{day}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="start_time">Start Time</Label>
+                <Label htmlFor="start_time" className="text-sm">Start Time</Label>
                 <Input
                   id="start_time"
                   name="start_time"
@@ -277,7 +277,7 @@ export default function SlotMatrixPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="end_time">End Time</Label>
+                <Label htmlFor="end_time" className="text-sm">End Time</Label>
                 <Input
                   id="end_time"
                   name="end_time"
@@ -287,7 +287,7 @@ export default function SlotMatrixPage() {
               </div>
             </div>
             <div>
-              <Label htmlFor="cluster">Cluster (for labs)</Label>
+              <Label htmlFor="cluster" className="text-sm">Cluster (for labs)</Label>
               <Input
                 id="cluster"
                 name="cluster"
@@ -296,13 +296,13 @@ export default function SlotMatrixPage() {
             </div>
             <div className="flex items-center gap-2">
               <Switch id="is_lab" name="is_lab" />
-              <Label htmlFor="is_lab">Is Lab Slot</Label>
+              <Label htmlFor="is_lab" className="text-sm">Is Lab Slot</Label>
             </div>
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button size="sm" type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Create</Button>
+              <Button size="sm" type="submit" className="bg-black text-white hover:bg-gray-800">Create</Button>
             </div>
           </form>
         </DialogContent>

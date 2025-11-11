@@ -5,7 +5,7 @@ import { AssignmentWithRelations } from '@/types/db'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, X, AlertCircle } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface RecommendationsSidePanelProps {
@@ -71,64 +71,77 @@ export function RecommendationsSidePanel({
   
   if (!selectedAssignment) {
     return (
-      <div className="w-80 bg-gray-50 h-full p-4 border-r">
-        <h3 className="font-semibold mb-4">Recommendations</h3>
-        <p className="text-sm text-gray-500">
-          Click on any class to see alternative slots
-        </p>
+      <div className="w-72 bg-white rounded-lg p-4 shadow-md border border-gray-200">
+        <h3 className="text-lg font-bold text-black mb-3">AI Recommendations</h3>
+        <div className="text-center">
+          <div className="w-12 h-12 bg-black rounded-full mx-auto mb-3 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p className="text-xs text-gray-600">
+            Click on any class to see AI-powered scheduling recommendations
+          </p>
+        </div>
       </div>
     )
   }
   
   return (
-    <div className="w-80 bg-white h-full border-r shadow-md">
-      <div className="p-4 border-b bg-gray-50">
+    <div className="w-72 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="bg-black p-4 text-white">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-semibold">Recommendations</h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <h3 className="text-lg font-bold mb-1">AI Recommendations</h3>
+            <p className="text-sm font-semibold opacity-90">
               {selectedAssignment.offering?.course?.code}
             </p>
             <div className="flex gap-2 mt-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge className="bg-white/20 text-white border-0 text-[10px]">
                 {selectedAssignment.kind}
               </Badge>
-              <Badge variant="outline" className="text-xs">
+              <Badge className="bg-white/20 text-white border-0 text-[10px]">
                 {selectedAssignment.offering?.section?.name}
               </Badge>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-200 rounded"
+            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
       </div>
       
-      <ScrollArea className="h-[calc(100vh-200px)]">
-        <div className="p-4">
+      <ScrollArea className="h-[calc(100vh-180px)]">
+        <div className="p-3">
           {isLoading ? (
-            <div className="flex flex-col items-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-500 mb-2" />
-              <p className="text-sm text-gray-500">Loading recommendations...</p>
+            <div className="flex flex-col items-center py-6">
+              <div className="relative">
+                <div className="w-12 h-12 border-4 border-gray-300 rounded-full animate-pulse"></div>
+                <div className="w-12 h-12 border-4 border-transparent border-t-black rounded-full animate-spin absolute top-0"></div>
+              </div>
+              <p className="text-xs text-gray-600 mt-3">Analyzing best options...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-8">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="text-center py-6">
+              <div className="w-10 h-10 bg-red-100 rounded-full mx-auto mb-2 flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+              </div>
+              <p className="text-xs text-red-600">{error}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {recommendations.map((rec, index) => (
                 <Card
                   key={index}
-                  className="p-3 hover:shadow-md transition-shadow cursor-pointer"
+                  className="p-3 hover:shadow-lg transition-all cursor-pointer transform hover:scale-[1.02] border-gray-200 hover:border-gray-400"
                   onClick={() => onApplyRecommendation(rec)}
                 >
                   <div className="mb-2">
-                    <p className="font-medium text-sm">{rec.display}</p>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="font-medium text-xs">{rec.display}</p>
+                    <p className="text-[10px] text-gray-600 mt-1">
                       Room: {rec.room?.code} (Cap: {rec.room?.capacity})
                     </p>
                   </div>
@@ -136,19 +149,19 @@ export function RecommendationsSidePanel({
                   <Badge 
                     variant={rec.penalty_delta === 0 ? 'default' : 
                              rec.penalty_delta < 5 ? 'secondary' : 'outline'}
-                    className="mb-2"
+                    className="mb-2 text-[10px]"
                   >
                     Score: {-rec.penalty_delta}
                   </Badge>
                   
-                  <div className="space-y-1 text-xs text-gray-600">
+                  <div className="space-y-1 text-[10px] text-gray-600">
                     {rec.reasons.map((reason: string, i: number) => (
                       <p key={i}>• {reason}</p>
                     ))}
                   </div>
                   
                   {rec.swaps && rec.swaps.length > 0 && (
-                    <p className="text-xs text-orange-600 mt-2">
+                    <p className="text-[10px] text-orange-600 mt-2">
                       Requires {rec.swaps.length} swap(s)
                     </p>
                   )}

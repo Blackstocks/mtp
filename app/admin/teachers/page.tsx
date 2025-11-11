@@ -106,19 +106,19 @@ export default function TeachersPage() {
   }
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Teachers</h1>
+    <div className="container mx-auto p-2 md:p-3 lg:p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Teachers</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => {
+            <Button size="sm" onClick={() => {
               setEditingTeacher(null)
               setAvoid8am(false)
               setAvoidLate(false)
               setPreferredDays([])
               setAvailableSlots([])
             }}>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-3 w-3" />
               Add Teacher
             </Button>
           </DialogTrigger>
@@ -130,7 +130,7 @@ export default function TeachersPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="code">Code</Label>
+                <Label htmlFor="code" className="text-sm">Code</Label>
                 <Input
                   id="code"
                   name="code"
@@ -139,7 +139,7 @@ export default function TeachersPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name" className="text-sm">Name</Label>
                 <Input
                   id="name"
                   name="name"
@@ -149,7 +149,7 @@ export default function TeachersPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="max_per_day">Max Classes/Day</Label>
+                  <Label htmlFor="max_per_day" className="text-sm">Max Classes/Day</Label>
                   <Input
                     id="max_per_day"
                     name="max_per_day"
@@ -159,7 +159,7 @@ export default function TeachersPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="max_per_week">Max Classes/Week</Label>
+                  <Label htmlFor="max_per_week" className="text-sm">Max Classes/Week</Label>
                   <Input
                     id="max_per_week"
                     name="max_per_week"
@@ -170,7 +170,7 @@ export default function TeachersPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <Label>Preferences</Label>
+                <Label className="text-sm">Preferences</Label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -178,7 +178,7 @@ export default function TeachersPage() {
                       checked={avoid8am}
                       onCheckedChange={(checked) => setAvoid8am(checked as boolean)}
                     />
-                    <Label htmlFor="avoid8am" className="font-normal">
+                    <Label htmlFor="avoid8am" className="font-normal text-xs">
                       Avoid 8 AM classes
                     </Label>
                   </div>
@@ -188,13 +188,13 @@ export default function TeachersPage() {
                       checked={avoidLate}
                       onCheckedChange={(checked) => setAvoidLate(checked as boolean)}
                     />
-                    <Label htmlFor="avoidLate" className="font-normal">
+                    <Label htmlFor="avoidLate" className="font-normal text-xs">
                       Avoid late evening classes (after 5 PM)
                     </Label>
                   </div>
                 </div>
                 <div>
-                  <Label>Preferred Days</Label>
+                  <Label className="text-sm">Preferred Days</Label>
                   <div className="grid grid-cols-5 gap-2 mt-2">
                     {['MON', 'TUE', 'WED', 'THU', 'FRI'].map(day => (
                       <div key={day} className="flex items-center space-x-2">
@@ -209,7 +209,7 @@ export default function TeachersPage() {
                             }
                           }}
                         />
-                        <Label htmlFor={day} className="font-normal text-sm">
+                        <Label htmlFor={day} className="font-normal text-xs">
                           {day}
                         </Label>
                       </div>
@@ -217,7 +217,7 @@ export default function TeachersPage() {
                   </div>
                 </div>
                 <div>
-                  <Label>Available Time Slots</Label>
+                  <Label className="text-sm">Available Time Slots</Label>
                   <div className="space-y-2 mt-2 max-h-48 overflow-y-auto border rounded-md p-3">
                     {uniqueTimeSlots.map(timeSlot => (
                       <div key={timeSlot} className="flex items-center space-x-2">
@@ -232,24 +232,24 @@ export default function TeachersPage() {
                             }
                           }}
                         />
-                        <Label htmlFor={timeSlot} className="font-normal text-sm">
+                        <Label htmlFor={timeSlot} className="font-normal text-xs">
                           {timeSlot}
                         </Label>
                       </div>
                     ))}
                   </div>
                   {availableSlots.length === 0 && (
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       No time slots selected - teacher will be considered available for all slots
                     </p>
                   )}
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button size="sm" type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button size="sm" type="submit" className="bg-black text-white hover:bg-gray-800">
                   {editingTeacher ? 'Update' : 'Create'}
                 </Button>
               </div>
@@ -258,35 +258,35 @@ export default function TeachersPage() {
         </Dialog>
       </div>
       
-      <Card>
+      <Card className="bg-white border border-gray-200">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Max/Day</TableHead>
-                <TableHead>Max/Week</TableHead>
-                <TableHead>Preferences</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-xs">Code</TableHead>
+                <TableHead className="text-xs">Name</TableHead>
+                <TableHead className="text-xs">Max/Day</TableHead>
+                <TableHead className="text-xs">Max/Week</TableHead>
+                <TableHead className="text-xs">Preferences</TableHead>
+                <TableHead className="text-xs">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {teachersList.map(teacher => (
                 <TableRow key={teacher.id}>
-                  <TableCell className="font-mono">{teacher.code}</TableCell>
-                  <TableCell>{teacher.name}</TableCell>
-                  <TableCell>{teacher.max_per_day}</TableCell>
-                  <TableCell>{teacher.max_per_week}</TableCell>
+                  <TableCell className="font-mono text-xs">{teacher.code}</TableCell>
+                  <TableCell className="text-xs">{teacher.name}</TableCell>
+                  <TableCell className="text-xs">{teacher.max_per_day}</TableCell>
+                  <TableCell className="text-xs">{teacher.max_per_week}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
-                      {teacher.prefs.avoid_8am && <Badge variant="secondary">No 8AM</Badge>}
-                      {teacher.prefs.avoid_late && <Badge variant="secondary">No Late</Badge>}
+                      {teacher.prefs.avoid_8am && <Badge variant="secondary" className="text-xs">No 8AM</Badge>}
+                      {teacher.prefs.avoid_late && <Badge variant="secondary" className="text-xs">No Late</Badge>}
                       {teacher.prefs.prefer_days?.map(day => (
-                        <Badge key={day} variant="outline">{day}</Badge>
+                        <Badge key={day} variant="outline" className="text-xs">{day}</Badge>
                       ))}
                       {teacher.prefs.available_slots?.length > 0 && (
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="text-xs">
                           {teacher.prefs.available_slots.length} time slots
                         </Badge>
                       )}
@@ -302,14 +302,14 @@ export default function TeachersPage() {
                           setIsDialogOpen(true)
                         }}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => deleteMutation.mutate(teacher.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>

@@ -93,25 +93,25 @@ export default function RoomsPage() {
   }
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Rooms</h1>
+    <div className="container mx-auto p-2 md:p-3 lg:p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Rooms</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingRoom(null)}>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button size="sm" onClick={() => setEditingRoom(null)} className="bg-black text-white hover:bg-gray-800">
+              <Plus className="mr-1 h-3 w-3" />
               Add Room
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg">
                 {editingRoom ? 'Edit Room' : 'Add New Room'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="code">Room Code</Label>
+                <Label htmlFor="code" className="text-sm">Room Code</Label>
                 <Input
                   id="code"
                   name="code"
@@ -121,7 +121,7 @@ export default function RoomsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="capacity">Capacity</Label>
+                <Label htmlFor="capacity" className="text-sm">Capacity</Label>
                 <Input
                   id="capacity"
                   name="capacity"
@@ -131,20 +131,20 @@ export default function RoomsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="kind">Type</Label>
+                <Label htmlFor="kind" className="text-sm">Type</Label>
                 <Select name="kind" defaultValue={editingRoom?.kind || 'CLASS'}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="CLASS">Classroom</SelectItem>
-                    <SelectItem value="LAB">Laboratory</SelectItem>
-                    <SelectItem value="DRAWING">Drawing Hall</SelectItem>
+                    <SelectItem value="CLASS" className="text-xs">Classroom</SelectItem>
+                    <SelectItem value="LAB" className="text-xs">Laboratory</SelectItem>
+                    <SelectItem value="DRAWING" className="text-xs">Drawing Hall</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Label htmlFor="tags" className="text-sm">Tags (comma-separated)</Label>
                 <Input
                   id="tags"
                   name="tags"
@@ -153,10 +153,10 @@ export default function RoomsPage() {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button size="sm" type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button size="sm" type="submit" className="bg-black text-white hover:bg-gray-800">
                   {editingRoom ? 'Update' : 'Create'}
                 </Button>
               </div>
@@ -165,32 +165,32 @@ export default function RoomsPage() {
         </Dialog>
       </div>
       
-      <Card>
+      <Card className="border border-gray-200">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Capacity</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-xs">Code</TableHead>
+                <TableHead className="text-xs">Type</TableHead>
+                <TableHead className="text-xs">Capacity</TableHead>
+                <TableHead className="text-xs">Tags</TableHead>
+                <TableHead className="text-xs">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {roomsList.map(room => (
                 <TableRow key={room.id}>
-                  <TableCell className="font-mono">{room.code}</TableCell>
+                  <TableCell className="font-mono text-xs">{room.code}</TableCell>
                   <TableCell>
-                    <Badge variant={room.kind === 'LAB' ? 'default' : 'secondary'}>
+                    <Badge variant="outline" className="text-xs border-gray-300">
                       {room.kind}
                     </Badge>
                   </TableCell>
-                  <TableCell>{room.capacity}</TableCell>
+                  <TableCell className="text-xs">{room.capacity}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {room.tags.map(tag => (
-                        <Badge key={tag} variant="outline">{tag}</Badge>
+                        <Badge key={tag} variant="outline" className="text-xs border-gray-300">{tag}</Badge>
                       ))}
                     </div>
                   </TableCell>
@@ -199,19 +199,21 @@ export default function RoomsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-gray-100"
                         onClick={() => {
                           setEditingRoom(room)
                           setIsDialogOpen(true)
                         }}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-gray-100"
                         onClick={() => deleteMutation.mutate(room.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>

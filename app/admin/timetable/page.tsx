@@ -304,85 +304,109 @@ export default function TimetablePage() {
   const currentViewId = viewType === 'section' ? selectedSectionId : selectedTeacherId
   
   return (
-    <div className="container-fluid mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Timetable</h1>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => generateMutation.mutate()}
-            disabled={generateMutation.isPending}
-          >
-            {generateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Schedule
-          </Button>
-          <Button 
-            onClick={() => reoptimizeMutation.mutate()}
-            variant="outline"
-            disabled={reoptimizeMutation.isPending || assignmentsList.length === 0}
-          >
-            {reoptimizeMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Re-optimize
-          </Button>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+    <div className="min-h-screen p-2 md:p-3 lg:p-4">
+      <div className="max-w-full mx-auto">
+        <div className="glass-effect rounded-lg p-3 mb-3 shadow-elegant animate-fade-in">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <div>
+              <h1 className="text-2xl font-bold text-gradient mb-1">University Timetable</h1>
+              <p className="text-xs text-gray-600">Manage and optimize class schedules with AI assistance</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                onClick={() => generateMutation.mutate()}
+                disabled={generateMutation.isPending}
+                size="sm"
+                className="gradient-primary text-white hover:opacity-90 transition-all text-xs"
+              >
+                {generateMutation.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                Generate
+              </Button>
+              <Button 
+                onClick={() => reoptimizeMutation.mutate()}
+                disabled={reoptimizeMutation.isPending || assignmentsList.length === 0}
+                size="sm"
+                variant="outline"
+                className="border-black text-black hover:bg-gray-100 transition-all text-xs"
+              >
+                {reoptimizeMutation.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                <RefreshCw className="mr-1 h-3 w-3" />
+                Re-optimize
+              </Button>
+              <Button 
+                variant="outline"
+                size="sm"
+                className="border-black text-black hover:bg-gray-100 transition-all text-xs"
+              >
+                <Download className="mr-1 h-3 w-3" />
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
       
-      {assignmentsList.length === 0 ? (
-        <Alert>
-          <AlertDescription>
-            No timetable generated yet. Click "Generate Schedule" to create an initial timetable.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <div className="flex gap-4">
-          {/* Left Side - Timetable */}
-          <div className="flex-1">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Schedule View</CardTitle>
-                  <Tabs value={viewType} onValueChange={(v) => setViewType(v as 'section' | 'teacher')}>
-                    <TabsList>
-                      <TabsTrigger value="section">By Section</TabsTrigger>
-                      <TabsTrigger value="teacher">By Teacher</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-                <div className="mt-4">
-                  {viewType === 'section' ? (
-                    <Select value={selectedSectionId} onValueChange={setSelectedSectionId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a section" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sections.map(section => (
-                          <SelectItem key={section.id} value={section.id}>
-                            {section.name} ({section.program} Year {section.year})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a teacher" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teachers.map(teacher => (
-                          <SelectItem key={teacher.id} value={teacher.id}>
-                            {teacher.name} ({teacher.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
+        {assignmentsList.length === 0 ? (
+          <div className="glass-effect rounded-lg p-6 text-center shadow-elegant animate-fade-in">
+            <div className="max-w-sm mx-auto">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-3 flex items-center justify-center">
+                <RefreshCw className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">No Timetable Generated</h3>
+              <p className="text-sm text-gray-600">
+                Click "Generate" to create an initial timetable
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-3">
+            {/* Main Content - Timetable */}
+            <div className="flex-1">
+              <Card className="glass-effect shadow-elegant border-0 animate-slide-in">
+                <CardHeader className="p-3 space-y-3">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <CardTitle className="text-lg font-bold">Schedule View</CardTitle>
+                    <Tabs value={viewType} onValueChange={(v) => setViewType(v as 'section' | 'teacher')} className="w-full sm:w-auto">
+                      <TabsList className="h-8 grid w-full grid-cols-2 bg-white/50">
+                        <TabsTrigger value="section" className="text-xs data-[state=active]:gradient-primary data-[state=active]:text-white">
+                          By Section
+                        </TabsTrigger>
+                        <TabsTrigger value="teacher" className="text-xs data-[state=active]:gradient-primary data-[state=active]:text-white">
+                          By Teacher
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  <div className="w-full">
+                    {viewType === 'section' ? (
+                      <Select value={selectedSectionId} onValueChange={setSelectedSectionId}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select a section" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {sections.map(section => (
+                            <SelectItem key={section.id} value={section.id} className="text-xs">
+                              {section.name} ({section.program} Year {section.year})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+                        <SelectTrigger className="h-8 text-xs w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select a teacher" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {teachers.map(teacher => (
+                            <SelectItem key={teacher.id} value={teacher.id} className="text-xs">
+                              {teacher.name} ({teacher.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </CardHeader>
+              <CardContent className="p-2">
                 {currentViewId && (
                   <TestTimetableGrid
                     assignments={assignmentsList}
@@ -397,24 +421,23 @@ export default function TimetablePage() {
                     }}
                   />
                 )}
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Right Side - Recommendations Panel */}
-          {selectedAssignment ? (
-            <RecommendationsSidePanel
-              selectedAssignment={selectedAssignment}
-              onApplyRecommendation={handleApplyRecommendation}
-              onClose={() => setSelectedAssignment(null)}
-            />
-          ) : (
-            <div className="text-xs text-gray-500 p-4">
-              Click any class card to see recommendations
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </div>
-      )}
+            
+            {/* Right Side - Recommendations Panel */}
+            {selectedAssignment && (
+              <div className="animate-slide-in lg:w-72">
+                <RecommendationsSidePanel
+                  selectedAssignment={selectedAssignment}
+                  onApplyRecommendation={handleApplyRecommendation}
+                  onClose={() => setSelectedAssignment(null)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
