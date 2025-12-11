@@ -31,8 +31,11 @@ function TestCard({ assignment, onToggleLock, onShowRecommendations }: {
     'P': 'bg-gray-600'
   }
 
+  // Format slot display
+  const slotDisplay = assignment.slot ? formatSlotDisplay(assignment.slot) : ''
+
   return (
-    <Card 
+    <Card
       className={`p-2 ${kindColors[assignment.kind]} text-white border-0 hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer active:scale-95`}
       onMouseDown={(e) => {
         // If not clicking on a button or the lock icon
@@ -47,8 +50,11 @@ function TestCard({ assignment, onToggleLock, onShowRecommendations }: {
     >
       <div className="text-xs font-bold">{assignment.offering?.course?.code}</div>
       <div className="text-[10px] opacity-90">{assignment.offering?.teacher?.name}</div>
-      <div className="flex justify-between items-center mt-2">
+      <div className="flex justify-between items-center mt-1">
         <Badge variant="secondary" className="text-[10px] bg-white/20 text-white border-0">{assignment.kind}</Badge>
+        {slotDisplay && (
+          <Badge variant="outline" className="text-[10px] bg-white/10 text-white border-white/30">{slotDisplay}</Badge>
+        )}
         <button
           type="button"
           onClick={(e) => {
