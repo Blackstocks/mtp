@@ -5,3 +5,4 @@ ortools>=9.12.0
 python-multipart
 pytest
 httpx
+redis>=5.0.0

@@ -1,0 +1,22 @@
+services:
+  # Python Solver Service
+  - type: web
+    name: timetable-solver
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: 8001
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: timetable-redis
+          property: connectionString
+    healthCheckPath: /health
+
+  # Redis Service
+  - type: redis
+    name: timetable-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru

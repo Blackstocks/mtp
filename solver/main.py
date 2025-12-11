@@ -3,10 +3,55 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import logging
+import os
+import json
+import hashlib
 from model import TimetableSolver, SolverInput, SolverOutput
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Redis connection (optional)
+redis_client = None
+REDIS_URL = os.getenv('REDIS_URL')
+
+if REDIS_URL:
+    try:
+        import redis
+        redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+        redis_client.ping()
+        logger.info("Connected to Redis successfully")
+    except Exception as e:
+        logger.warning(f"Redis connection failed: {e}. Caching disabled.")
+        redis_client = None
+
+def get_cache_key(data: dict) -> str:
+    """Generate a hash key from input data for caching"""
+    serialized = json.dumps(data, sort_keys=True, default=str)
+    return f"solver:{hashlib.md5(serialized.encode()).hexdigest()}"
+
+def get_cached_result(key: str) -> Optional[dict]:
+    """Get cached result from Redis"""
+    if not redis_client:
+        return None
+    try:
+        cached = redis_client.get(key)
+        if cached:
+            logger.info(f"Cache hit for key: {key[:20]}...")
+            return json.loads(cached)
+    except Exception as e:
+        logger.warning(f"Redis get error: {e}")
+    return None
+
+def set_cached_result(key: str, result: dict, ttl: int = 3600):
+    """Cache result in Redis with TTL (default 1 hour)"""
+    if not redis_client:
+        return
+    try:
+        redis_client.setex(key, ttl, json.dumps(result, default=str))
+        logger.info(f"Cached result for key: {key[:20]}...")
+    except Exception as e:
+        logger.warning(f"Redis set error: {e}")
 
 app = FastAPI(title="Timetable Solver API")
 
@@ -37,7 +82,8 @@ class RecommendationResponse(BaseModel):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "solver": "or-tools"}
+    redis_status = "connected" if redis_client else "disabled"
+    return {"status": "healthy", "solver": "or-tools", "redis": redis_status}
 
 @app.post("/solve", response_model=SolverOutput)
 async def solve_timetable(input_data: SolverInput):
