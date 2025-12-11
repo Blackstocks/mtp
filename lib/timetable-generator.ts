@@ -176,10 +176,12 @@ export class TimetableGenerator {
   }
   
   private isTeacherBusy(teacherId: string, slots: Slot[]): boolean {
-    return this.assignments.some(assignment => 
-      assignment.offering?.teacher_id === teacherId &&
-      slots.some(slot => slot.id === assignment.slot_id)
-    )
+    return this.assignments.some(assignment => {
+      const offering = this.offerings.find(o => o.id === assignment.offering_id)
+      const assignmentTeacherId = assignment.offering?.teacher_id || offering?.teacher_id
+      return assignmentTeacherId === teacherId &&
+        slots.some(slot => slot.id === assignment.slot_id)
+    })
   }
   
   private isRoomAvailable(roomId: string, slots: Slot[]): boolean {
@@ -212,9 +214,13 @@ export class TimetableGenerator {
   private getTeacherLoad(teacherId: string): { daily: Map<string, number>, weekly: number } {
     const daily = new Map<string, number>()
     let weekly = 0
-    
+
     this.assignments.forEach(assignment => {
-      if (assignment.offering?.teacher_id === teacherId) {
+      // Look up the offering to get the teacher_id
+      const offering = this.offerings.find(o => o.id === assignment.offering_id)
+      const assignmentTeacherId = assignment.offering?.teacher_id || offering?.teacher_id
+
+      if (assignmentTeacherId === teacherId) {
         const slot = this.slots.get(assignment.slot_id)
         if (slot?.day) {
           const duration = this.getSlotDuration(slot)
@@ -223,7 +229,7 @@ export class TimetableGenerator {
         }
       }
     })
-    
+
     return { daily, weekly }
   }
   
