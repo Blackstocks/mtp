@@ -259,9 +259,9 @@ export default function ConflictsPage() {
     return <AlertCircle className="h-4 w-4" />
   }
 
-  const getReasonColor = (reason: string) => {
+  const getReasonColor = (reason: string): "default" | "destructive" | "outline" | "secondary" => {
     if (reason.includes('No teacher')) return 'destructive'
-    if (reason.includes('Lab')) return 'warning'
+    if (reason.includes('Lab')) return 'outline'
     if (reason.includes('conflict')) return 'secondary'
     return 'default'
   }
