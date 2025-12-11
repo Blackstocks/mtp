@@ -1,0 +1,6 @@
+name,email,designation,max_hours_per_day,max_hours_per_week,avoid_early_morning
+Dr. John Smith,john.smith@university.edu,Professor,6,20,false
+Dr. Jane Doe,jane.doe@university.edu,Associate Professor,6,18,true
+Dr. Robert Johnson,robert.j@university.edu,Assistant Professor,8,24,false
+Prof. Maria Garcia,maria.g@university.edu,Professor,4,16,true
+Dr. Ahmed Khan,ahmed.k@university.edu,Lecturer,8,30,false

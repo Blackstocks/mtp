@@ -67,51 +67,56 @@ export const assignmentSchema = z.object({
   is_locked: z.boolean().default(false)
 })
 
-// CSV import schemas
+// CSV import schemas - Updated for better import functionality
 export const teacherCsvSchema = z.object({
-  code: z.string(),
-  name: z.string(),
-  max_per_day: z.string().transform(v => parseInt(v)),
-  max_per_week: z.string().transform(v => parseInt(v)),
-  prefs: z.string().transform(v => v ? JSON.parse(v) : {})
+  name: z.string().min(1),
+  email: z.string().email(),
+  designation: z.string().optional(),
+  max_hours_per_day: z.string().transform(v => parseInt(v) || 6),
+  max_hours_per_week: z.string().transform(v => parseInt(v) || 20),
+  avoid_early_morning: z.string().transform(v => v.toLowerCase() === 'true')
 })
 
 export const roomCsvSchema = z.object({
-  code: z.string(),
+  code: z.string().min(1),
   capacity: z.string().transform(v => parseInt(v)),
-  kind: z.enum(['CLASS', 'LAB', 'DRAWING']),
+  kind: z.string().transform(v => {
+    const normalized = v.toLowerCase()
+    if (normalized === 'classroom' || normalized === 'class') return 'classroom'
+    if (normalized === 'lab' || normalized === 'laboratory') return 'lab'
+    if (normalized === 'tutorial') return 'tutorial'
+    throw new Error(`Invalid room kind: ${v}`)
+  }),
   tags: z.string().transform(v => v ? v.split(';').filter(Boolean) : [])
 })
 
 export const courseCsvSchema = z.object({
-  code: z.string(),
-  name: z.string(),
-  L: z.string().transform(v => parseInt(v)),
-  T: z.string().transform(v => parseInt(v)),
-  P: z.string().transform(v => parseInt(v))
+  code: z.string().min(1),
+  name: z.string().min(1),
+  L: z.string().transform(v => parseInt(v) || 0),
+  T: z.string().transform(v => parseInt(v) || 0),
+  P: z.string().transform(v => parseInt(v) || 0),
+  credits: z.string().transform(v => parseFloat(v) || 0).optional()
 })
 
 export const sectionCsvSchema = z.object({
-  program: z.string(),
+  name: z.string().min(1),
+  program: z.string().min(1),
   year: z.string().transform(v => parseInt(v)),
-  name: z.string()
+  student_count: z.string().transform(v => parseInt(v) || 60)
 })
 
 export const offeringCsvSchema = z.object({
-  course_code: z.string(),
-  section_name: z.string(),
-  teacher_code: z.string(),
-  expected_size: z.string().transform(v => parseInt(v)),
+  course_code: z.string().min(1),
+  section_name: z.string().min(1),
+  teacher_email: z.string().email(),
   needs: z.string().transform(v => v ? v.split(';').filter(Boolean) : [])
 })
 
 export const slotCsvSchema = z.object({
-  code: z.string(),
-  occ: z.string().transform(v => parseInt(v)),
   day: z.enum(['MON', 'TUE', 'WED', 'THU', 'FRI']),
-  start_time: z.string(),
-  end_time: z.string(),
-  cluster: z.string().transform(v => v || null),
+  start_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+  end_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
   is_lab: z.string().transform(v => v.toLowerCase() === 'true')
 })
 

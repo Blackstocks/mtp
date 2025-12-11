@@ -5,7 +5,7 @@ import { AssignmentWithRelations } from '@/types/db'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, X, AlertCircle } from 'lucide-react'
+import { Loader2, X, AlertCircle, Check, XIcon } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface RecommendationsSidePanelProps {
@@ -22,6 +22,7 @@ export function RecommendationsSidePanel({
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [applyingId, setApplyingId] = useState<string | null>(null)
   
   useEffect(() => {
     console.log('RecommendationsSidePanel - selectedAssignment:', selectedAssignment)
@@ -136,35 +137,64 @@ export function RecommendationsSidePanel({
               {recommendations.map((rec, index) => (
                 <Card
                   key={index}
-                  className="p-3 hover:shadow-lg transition-all cursor-pointer transform hover:scale-[1.02] border-gray-200 hover:border-gray-400"
-                  onClick={() => onApplyRecommendation(rec)}
+                  className="p-3 transition-all border-gray-200 hover:border-gray-400"
                 >
-                  <div className="mb-2">
-                    <p className="font-medium text-xs">{rec.display}</p>
-                    <p className="text-[10px] text-gray-600 mt-1">
-                      Room: {rec.room?.code} (Cap: {rec.room?.capacity})
-                    </p>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="font-medium text-xs">{rec.display}</p>
+                      <p className="text-[10px] text-gray-600 mt-1">
+                        Room: {rec.room?.code} (Capacity: {rec.room?.capacity})
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1 text-[10px] text-gray-600">
+                      {rec.reasons.map((reason: string, i: number) => (
+                        <p key={i}>• {reason}</p>
+                      ))}
+                    </div>
+                    
+                    {rec.swaps && rec.swaps.length > 0 && (
+                      <p className="text-[10px] text-orange-600">
+                        Requires {rec.swaps.length} swap(s)
+                      </p>
+                    )}
+                    
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        className="flex-1 h-7 text-xs bg-black hover:bg-gray-800"
+                        onClick={async () => {
+                          setApplyingId(rec.slot_id)
+                          await onApplyRecommendation({
+                            ...rec,
+                            assignment: selectedAssignment
+                          })
+                          setApplyingId(null)
+                        }}
+                        disabled={applyingId === rec.slot_id}
+                      >
+                        {applyingId === rec.slot_id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Check className="h-3 w-3 mr-1" />
+                            Apply
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2"
+                        onClick={() => {
+                          // Remove this recommendation from the list
+                          setRecommendations(prev => prev.filter((_, i) => i !== index))
+                        }}
+                      >
+                        <XIcon className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <Badge 
-                    variant={rec.penalty_delta === 0 ? 'default' : 
-                             rec.penalty_delta < 5 ? 'secondary' : 'outline'}
-                    className="mb-2 text-[10px]"
-                  >
-                    Score: {-rec.penalty_delta}
-                  </Badge>
-                  
-                  <div className="space-y-1 text-[10px] text-gray-600">
-                    {rec.reasons.map((reason: string, i: number) => (
-                      <p key={i}>• {reason}</p>
-                    ))}
-                  </div>
-                  
-                  {rec.swaps && rec.swaps.length > 0 && (
-                    <p className="text-[10px] text-orange-600 mt-2">
-                      Requires {rec.swaps.length} swap(s)
-                    </p>
-                  )}
                 </Card>
               ))}
             </div>

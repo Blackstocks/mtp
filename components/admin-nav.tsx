@@ -11,7 +11,8 @@ import {
   Clock, 
   TableProperties,
   Home,
-  Upload
+  Upload,
+  AlertCircle
 } from 'lucide-react'
 
 const navItems = [
@@ -49,6 +50,11 @@ const navItems = [
     title: 'Timetable',
     href: '/admin/timetable',
     icon: Calendar
+  },
+  {
+    title: 'Conflicts',
+    href: '/admin/conflicts',
+    icon: AlertCircle
   },
   {
     title: 'Import Data',

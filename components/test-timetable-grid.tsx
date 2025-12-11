@@ -7,6 +7,7 @@ import { AssignmentWithRelations, Slot } from '@/types/db'
 import { useDraggable, useDroppable, DndContext, DragEndEvent } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
+import { formatSlotDisplay } from '@/lib/slot-utils'
 
 interface TimetableGridProps {
   assignments: AssignmentWithRelations[]
@@ -85,6 +86,10 @@ export function TestTimetableGrid({
   }
   
   const filteredAssignments = assignments.filter(a => {
+    if (!viewId) {
+      // If no view selected, show all assignments
+      return true
+    }
     if (viewType === 'section') {
       return a.offering?.section?.id === viewId
     } else {
@@ -183,7 +188,7 @@ function DroppableSlot({ slot, children }: { slot: Slot; children: React.ReactNo
       `}
     >
       <div className="text-[10px] font-semibold mb-1">
-        {slot.code}{slot.occ}
+        {formatSlotDisplay(slot)}
         {slot.is_lab && <Badge variant="outline" className="text-[10px] ml-1">LAB</Badge>}
       </div>
       {children}

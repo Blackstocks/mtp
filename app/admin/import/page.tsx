@@ -5,25 +5,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { Upload, CheckCircle, AlertCircle, Download } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, Download, FileText, Info } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { AdminNav } from '@/components/admin-nav'
 
 export default function ImportPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<any>(null)
+  const [errors, setErrors] = useState<string[]>([])
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setResults(null)
+    setErrors([])
     
     const formData = new FormData(e.currentTarget)
     
     try {
-      const response = await fetch('/api/seed/import', {
+      const response = await fetch('/api/import', {
         method: 'POST',
         body: formData
       })
@@ -37,13 +40,15 @@ export default function ImportPage() {
           description: 'Data has been imported successfully'
         })
       } else {
+        setErrors(data.errors || [data.error])
         toast({
           title: 'Import failed',
-          description: data.error,
+          description: data.error || 'Some files failed to import',
           variant: 'destructive'
         })
       }
     } catch (error: any) {
+      setErrors([error.message])
       toast({
         title: 'Import error',
         description: error.message,
@@ -54,491 +59,334 @@ export default function ImportPage() {
     }
   }
   
-  const handleQuickSeed = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/seed/quick', {
-        method: 'POST'
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setResults(data.results)
-        toast({
-          title: 'Quick seed successful',
-          description: 'Sample data has been loaded'
-        })
-      } else {
-        throw new Error(data.error)
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Seed error',
-        description: error.message,
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  const handleAerospaceCourses = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/seed/aerospace-courses', {
-        method: 'POST'
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast({
-          title: 'Aerospace courses loaded',
-          description: data.message || `${data.courses} aerospace engineering courses added`
-        })
-        // Log details for debugging
-        console.log('Load AE Courses response:', data)
-      } else {
-        console.error('Load AE Courses error:', data)
-        throw new Error(data.error || 'Failed to load courses')
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Error loading courses',
-        description: error.message,
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  const handleAerospaceTeachers = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/seed/aerospace-teachers', {
-        method: 'POST'
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast({
-          title: 'Aerospace teachers & offerings loaded',
-          description: `Loaded ${data.stats.teachers} teachers with ${data.stats.offerings} course assignments`
-        })
-        setResults(data.stats)
-      } else {
-        throw new Error(data.error || 'Failed to load teachers')
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Error loading teachers',
-        description: error.message,
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  const handleLoadTimetableData = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/seed/load-timetable-data', {
-        method: 'POST'
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast({
-          title: 'Timetable data loaded successfully',
-          description: `Loaded ${data.results.teachers} teachers, ${data.results.rooms} rooms, ${data.results.courses} courses, ${data.results.offerings} offerings`
-        })
-        setResults(data.results)
-      } else {
-        throw new Error(data.error || 'Failed to load timetable data')
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Error loading timetable data',
-        description: error.message,
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Import Data</h1>
-        <p className="text-muted-foreground mt-2">
-          Import data from CSV files or use quick seed for sample data
-        </p>
+    <>
+      <AdminNav />
+      <div className="container mx-auto py-10">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">Import Data</h1>
+            <p className="text-muted-foreground mt-2">
+              Import your timetable data from CSV files
+            </p>
+          </div>
+          
+          {/* Instructions */}
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Import Instructions</AlertTitle>
+            <AlertDescription className="mt-2 space-y-2">
+              <p>Follow these steps to import your data:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Download the CSV templates below</li>
+                <li>Fill in your data following the template format</li>
+                <li>Import files in order: Teachers → Rooms → Courses → Sections → Offerings → Slots</li>
+                <li>Ensure all foreign key references (emails, codes, names) match exactly</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+          
+          {/* CSV Templates */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                CSV Templates
+              </CardTitle>
+              <CardDescription>
+                Download these templates and fill them with your data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/teachers.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Teachers Template
+                  </a>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/rooms.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Rooms Template
+                  </a>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/courses.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Courses Template
+                  </a>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/sections.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Sections Template
+                  </a>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/offerings.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Offerings Template
+                  </a>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <a href="/templates/slots.csv" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Slots Template
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Import Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Import CSV Files</CardTitle>
+              <CardDescription>
+                Upload your filled CSV files to import data into the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="teachers">
+                      Teachers CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="teachers" 
+                      name="teachers" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Faculty members with teaching constraints
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="rooms">
+                      Rooms CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="rooms" 
+                      name="rooms" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Classrooms and labs with capacity
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="courses">
+                      Courses CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="courses" 
+                      name="courses" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Courses with L-T-P structure
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="sections">
+                      Sections CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="sections" 
+                      name="sections" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Student sections by program and year
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="offerings">
+                      Offerings CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="offerings" 
+                      name="offerings" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Maps courses to teachers and sections
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="slots">
+                      Slots CSV
+                      <Badge variant="secondary" className="ml-2 text-xs">Required</Badge>
+                    </Label>
+                    <Input 
+                      id="slots" 
+                      name="slots" 
+                      type="file" 
+                      accept=".csv"
+                      required
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Weekly time slots (fixed institutional schedule)
+                    </p>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="w-full"
+                  size="lg"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {loading ? 'Importing...' : 'Import All Files'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+          
+          {/* Field Descriptions */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">CSV Field Descriptions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm">Teachers CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>name</code>: Full name of the teacher</li>
+                    <li>• <code>email</code>: Unique email address (used as reference)</li>
+                    <li>• <code>designation</code>: Job title (Professor, Associate Professor, etc.)</li>
+                    <li>• <code>max_hours_per_day</code>: Maximum teaching hours per day</li>
+                    <li>• <code>max_hours_per_week</code>: Maximum teaching hours per week</li>
+                    <li>• <code>avoid_early_morning</code>: true/false for 8 AM slot preference</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-sm">Courses CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>code</code>: Unique course code (e.g., CS101)</li>
+                    <li>• <code>name</code>: Full course name</li>
+                    <li>• <code>L</code>: Lecture hours per week</li>
+                    <li>• <code>T</code>: Tutorial hours per week</li>
+                    <li>• <code>P</code>: Practical/Lab hours per week (3-hour blocks)</li>
+                    <li>• <code>credits</code>: Course credits</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-sm">Rooms CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>code</code>: Unique room identifier</li>
+                    <li>• <code>capacity</code>: Maximum student capacity</li>
+                    <li>• <code>kind</code>: classroom/lab/tutorial</li>
+                    <li>• <code>tags</code>: Features separated by semicolon (projector;ac;whiteboard)</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">More Field Descriptions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm">Sections CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>name</code>: Section identifier (e.g., CSE-1A)</li>
+                    <li>• <code>program</code>: Department/Program name</li>
+                    <li>• <code>year</code>: Academic year (1, 2, 3, or 4)</li>
+                    <li>• <code>student_count</code>: Number of students in section</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-sm">Offerings CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>course_code</code>: References code from courses.csv</li>
+                    <li>• <code>section_name</code>: References name from sections.csv</li>
+                    <li>• <code>teacher_email</code>: References email from teachers.csv</li>
+                    <li>• <code>needs</code>: Special requirements (projector;lab_equipment)</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-sm">Slots CSV</h4>
+                  <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                    <li>• <code>day</code>: MON/TUE/WED/THU/FRI</li>
+                    <li>• <code>start_time</code>: 24-hour format (HH:MM:SS)</li>
+                    <li>• <code>end_time</code>: 24-hour format (HH:MM:SS)</li>
+                    <li>• <code>is_lab</code>: true for 3-hour lab slots, false for theory</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Results */}
+          {results && (
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle>Import Successful</AlertTitle>
+              <AlertDescription>
+                <div className="mt-2 space-y-1">
+                  {Object.entries(results).map(([key, value]) => (
+                    <div key={key} className="flex justify-between items-center">
+                      <span className="capitalize">{key}:</span>
+                      <Badge variant="secondary">{value} records imported</Badge>
+                    </div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Errors */}
+          {errors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Import Errors</AlertTitle>
+              <AlertDescription>
+                <ul className="mt-2 space-y-1 list-disc list-inside">
+                  {errors.map((error, idx) => (
+                    <li key={idx} className="text-sm">{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
       </div>
-      
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Complete Timetable Data
-              <Badge variant="outline" className="text-xs border-gray-300">RECOMMENDED</Badge>
-            </CardTitle>
-            <CardDescription>
-              Load full IIT KGP timetable data
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleLoadTimetableData} 
-              disabled={loading}
-              className="w-full bg-black text-white hover:bg-gray-800"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Load Complete Data
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              This will load:
-              • 50+ teachers with full names
-              • 30+ rooms (classrooms & labs)
-              • 70+ courses with proper L-T-P
-              • 5 sections (FIRST-1, AE 2-4, PG)
-              • 100+ course offerings
-              • IIT KGP time slots
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Quick Seed</CardTitle>
-            <CardDescription>
-              Load sample data to quickly test the system
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleQuickSeed} 
-              disabled={loading}
-              className="w-full border-gray-300 hover:bg-gray-100"
-              variant="outline"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Load Sample Data
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              This will load:
-              • 3 teachers with availability
-              • 5 rooms (classrooms and labs)
-              • 5 courses with L-T-P structure
-              • 5 sections
-              • Sample offerings
-              • Default IIT KGP time slots
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Aerospace Courses</CardTitle>
-            <CardDescription>
-              Load IIT KGP Aerospace Engineering courses
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleAerospaceCourses} 
-              disabled={loading}
-              className="w-full bg-gray-200 text-black hover:bg-gray-300"
-              variant="secondary"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Load AE Courses
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              This will load 42 courses including:
-              • AE courses (2nd-4th year)
-              • Lab courses
-              • Core engineering courses
-              • PG/Elective courses
-              • Interdisciplinary courses
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Aerospace Teachers</CardTitle>
-            <CardDescription>
-              Load IIT KGP Aerospace Department faculty
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleAerospaceTeachers} 
-              disabled={loading}
-              className="w-full bg-gray-200 text-black hover:bg-gray-300"
-              variant="secondary"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Load AE Faculty & Assignments
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              This will load:
-              • 22 faculty members with full names
-              • Create course-teacher assignments
-              • Set up offerings for each course
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Step 1: Create Sections</CardTitle>
-            <CardDescription>
-              Create academic sections (Required before offerings)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={async () => {
-                setLoading(true)
-                try {
-                  const response = await fetch('/api/seed/create-sections', { method: 'POST' })
-                  const data = await response.json()
-                  if (data.success) {
-                    toast({
-                      title: 'Sections created',
-                      description: data.message
-                    })
-                  } else {
-                    throw new Error(data.error)
-                  }
-                } catch (error: any) {
-                  toast({
-                    title: 'Error creating sections',
-                    description: error.message,
-                    variant: 'destructive'
-                  })
-                } finally {
-                  setLoading(false)
-                }
-              }}
-              disabled={loading}
-              className="w-full bg-black text-white hover:bg-gray-800"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Create Sections
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">
-              Creates: FIRST-1, AE-2A, AE-3A, AE-4A, AE-PG-1
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Step 2: Create Course Offerings</CardTitle>
-            <CardDescription>
-              Map courses to teachers and sections
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={async () => {
-                setLoading(true)
-                try {
-                  const response = await fetch('/api/seed/create-offerings', { method: 'POST' })
-                  const data = await response.json()
-                  if (data.success) {
-                    toast({
-                      title: 'Offerings created',
-                      description: data.message
-                    })
-                  } else {
-                    throw new Error(data.error)
-                  }
-                } catch (error: any) {
-                  toast({
-                    title: 'Error creating offerings',
-                    description: error.message,
-                    variant: 'destructive'
-                  })
-                } finally {
-                  setLoading(false)
-                }
-              }}
-              disabled={loading}
-              className="w-full bg-gray-200 text-black hover:bg-gray-300"
-              variant="secondary"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Create Offerings
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">
-              Maps courses to teachers and sections based on timetable
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>Step 3: Set Teacher Availability</CardTitle>
-            <CardDescription>
-              Make all teachers available for all slots
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={async () => {
-                setLoading(true)
-                try {
-                  const response = await fetch('/api/seed/set-teacher-availability', { method: 'POST' })
-                  const data = await response.json()
-                  if (data.success) {
-                    toast({
-                      title: 'Availability set',
-                      description: data.message
-                    })
-                  } else {
-                    throw new Error(data.error)
-                  }
-                } catch (error: any) {
-                  toast({
-                    title: 'Error setting availability',
-                    description: error.message,
-                    variant: 'destructive'
-                  })
-                } finally {
-                  setLoading(false)
-                }
-              }}
-              disabled={loading}
-              className="w-full bg-black text-white hover:bg-gray-800"
-            >
-              <Upload className="mr-2 h-3 w-3" />
-              Set Availability
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">
-              Makes all teachers available for all time slots
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <CardTitle>CSV Templates</CardTitle>
-            <CardDescription>
-              Download templates for bulk data import
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/teachers.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Teachers Template
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/rooms.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Rooms Template
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/courses.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Courses Template
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/sections.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Sections Template
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/offerings.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Offerings Template
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-100" asChild>
-              <a href="/seed/slot_matrix.csv" download>
-                <Download className="mr-2 h-3 w-3" />
-                Slot Matrix Template
-              </a>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Import CSV Files</CardTitle>
-          <CardDescription>
-            Upload your CSV files to import data into the system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="teachers">Teachers CSV</Label>
-                <Input id="teachers" name="teachers" type="file" accept=".csv" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="rooms">Rooms CSV</Label>
-                <Input id="rooms" name="rooms" type="file" accept=".csv" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="courses">Courses CSV</Label>
-                <Input id="courses" name="courses" type="file" accept=".csv" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sections">Sections CSV</Label>
-                <Input id="sections" name="sections" type="file" accept=".csv" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="offerings">Offerings CSV</Label>
-                <Input id="offerings" name="offerings" type="file" accept=".csv" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="slots">Slots CSV</Label>
-                <Input id="slots" name="slots" type="file" accept=".csv" />
-              </div>
-            </div>
-            <Button type="submit" disabled={loading} className="w-full bg-black text-white hover:bg-gray-800">
-              <Upload className="mr-2 h-3 w-3" />
-              Import Files
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      
-      {results && (
-        <Alert>
-          <CheckCircle className="h-3 w-3" />
-          <AlertDescription>
-            <div className="font-semibold mb-2">Import Results:</div>
-            <ul className="space-y-1">
-              {Object.entries(results).map(([key, value]) => (
-                <li key={key}>
-                  {key}: {value} records imported
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-    </div>
+    </>
   )
 }

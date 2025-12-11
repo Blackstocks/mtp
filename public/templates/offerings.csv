@@ -1,0 +1,10 @@
+course_code,section_name,teacher_email,needs
+CS101,CSE-1A,john.smith@university.edu,projector
+CS101,CSE-1B,john.smith@university.edu,projector
+CS201,CSE-2A,jane.doe@university.edu,projector;whiteboard
+CS201,CSE-2B,jane.doe@university.edu,projector;whiteboard
+MATH101,CSE-1A,robert.j@university.edu,
+MATH101,CSE-1B,maria.g@university.edu,
+PHY101,CSE-1A,ahmed.k@university.edu,lab_equipment
+CS301,CSE-3A,john.smith@university.edu,computers
+CS302,CSE-3A,jane.doe@university.edu,computers

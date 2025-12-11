@@ -88,9 +88,30 @@ export const assignmentsFixed = {
   },
   
   async bulkUpsert(assignments: any[]) {
+    // Clean assignments to only include database fields
+    const cleanedAssignments = assignments.map(a => ({
+      offering_id: a.offering_id,
+      slot_id: a.slot_id,
+      room_id: a.room_id || null,
+      kind: a.kind,
+      is_locked: a.is_locked || false
+    }))
+    
+    // Check for duplicates based on primary key
+    const seen = new Set<string>()
+    const uniqueAssignments = cleanedAssignments.filter(a => {
+      const key = `${a.offering_id}-${a.kind}-${a.slot_id}`
+      if (seen.has(key)) {
+        console.warn('Duplicate assignment detected:', key)
+        return false
+      }
+      seen.add(key)
+      return true
+    })
+    
     const { error } = await supabase
       .from('assignment')
-      .upsert(assignments)
+      .upsert(uniqueAssignments)
     if (error) throw error
   },
   

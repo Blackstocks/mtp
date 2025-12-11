@@ -96,7 +96,8 @@ export default function OfferingsPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const needs = (formData.get('needs') as string).split(',').map(n => n.trim()).filter(Boolean)
+    const needsInput = formData.get('needs') as string
+    const needs = needsInput ? needsInput.split(',').map(n => n.trim()).filter(Boolean) : []
     
     const teacherId = formData.get('teacher_id') as string
     const data = {
@@ -111,7 +112,9 @@ export default function OfferingsPage() {
   }
   
   const groupedOfferings = offeringsList.reduce((acc, offering) => {
-    const key = `${offering.section?.program}-${offering.section?.year}`
+    const program = offering.section?.program || 'Unknown'
+    const year = offering.section?.year || 0
+    const key = `${program}-${year}`
     if (!acc[key]) acc[key] = []
     acc[key].push(offering)
     return acc
@@ -246,7 +249,7 @@ export default function OfferingsPage() {
                     <TableCell className="text-xs">{offering.expected_size}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
-                        {offering.needs.map(need => (
+                        {(offering.needs || []).map(need => (
                           <Badge key={need} variant="outline" className="text-xs border-gray-300">{need}</Badge>
                         ))}
                       </div>

@@ -257,7 +257,8 @@ export const availability = {
 // Assignment queries
 export const assignments = {
   async list() {
-    const { data, error } = await supabase
+    // First get assignments with offering and slot data
+    const { data: assignmentsData, error: assignmentsError } = await supabase
       .from('assignment')
       .select(`
         *,
@@ -267,11 +268,34 @@ export const assignments = {
           section(id, program, year, name),
           teacher(id, code, name)
         ),
-        slot(*),
-        room(*)
+        slot(*)
       `)
-    if (error) throw error
-    return data as AssignmentWithRelations[]
+    
+    if (assignmentsError) throw assignmentsError
+    if (!assignmentsData || assignmentsData.length === 0) return []
+    
+    // Get unique room IDs
+    const roomIds = [...new Set(assignmentsData.filter(a => a.room_id).map(a => a.room_id))]
+    
+    // Fetch rooms if there are any
+    let roomMap = new Map()
+    if (roomIds.length > 0) {
+      const { data: roomsData, error: roomsError } = await supabase
+        .from('room')
+        .select('*')
+        .in('id', roomIds)
+      
+      if (roomsError) throw roomsError
+      roomMap = new Map(roomsData?.map(r => [r.id, r]) || [])
+    }
+    
+    // Add room data to assignments
+    const enrichedAssignments = assignmentsData.map(assignment => ({
+      ...assignment,
+      room: assignment.room_id ? roomMap.get(assignment.room_id) || null : null
+    }))
+    
+    return enrichedAssignments as AssignmentWithRelations[]
   },
   
   async create(assignment: Assignment) {

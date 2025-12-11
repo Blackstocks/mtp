@@ -76,7 +76,8 @@ export default function RoomsPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const tags = (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean)
+    const tagsInput = formData.get('tags') as string
+    const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : []
     
     const data = {
       code: formData.get('code') as string,
@@ -148,7 +149,7 @@ export default function RoomsPage() {
                 <Input
                   id="tags"
                   name="tags"
-                  defaultValue={editingRoom?.tags.join(', ')}
+                  defaultValue={editingRoom?.tags?.join(', ') || ''}
                   placeholder="Projector, AC, PC"
                 />
               </div>
@@ -189,7 +190,7 @@ export default function RoomsPage() {
                   <TableCell className="text-xs">{room.capacity}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
-                      {room.tags.map(tag => (
+                      {(room.tags || []).map(tag => (
                         <Badge key={tag} variant="outline" className="text-xs border-gray-300">{tag}</Badge>
                       ))}
                     </div>

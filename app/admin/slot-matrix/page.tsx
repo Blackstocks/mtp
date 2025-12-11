@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { slots, supabase } from '@/lib/db'
 import { Slot } from '@/types/db'
+import { formatSlotDisplay } from '@/lib/slot-utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -198,7 +199,7 @@ export default function SlotMatrixPage() {
                       .map(slot => (
                         <TableRow key={slot.id}>
                           <TableCell className="font-mono text-xs">
-                            {slot.code}{slot.occ}
+                            {formatSlotDisplay(slot)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1 text-xs">

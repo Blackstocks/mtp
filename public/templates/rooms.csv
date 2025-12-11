@@ -1,0 +1,11 @@
+code,capacity,kind,tags
+L101,60,classroom,projector;ac;whiteboard
+L102,80,classroom,projector;whiteboard
+L103,40,classroom,whiteboard
+LAB101,30,lab,computers;projector;ac
+LAB102,25,lab,electronics;oscilloscopes
+LAB103,40,lab,chemistry;fume_hood
+T101,20,tutorial,whiteboard;round_tables
+T102,25,tutorial,whiteboard
+LH101,200,classroom,projector;mic;ac
+LH102,150,classroom,projector;mic

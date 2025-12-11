@@ -12,8 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/components/ui/use-toast'
-import { Loader2, RefreshCw, Download } from 'lucide-react'
+import { Loader2, RefreshCw, Download, FileText, Table as TableIcon } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { generateTimetablePDF } from '@/lib/pdf-export'
 
 export default function TimetablePage() {
   const { toast } = useToast()
@@ -64,36 +71,56 @@ export default function TimetablePage() {
   const generateMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/solver/generate', { method: 'POST' })
-      if (!response.ok) throw new Error('Failed to generate timetable')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to generate timetable')
+      }
       return response.json()
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] })
       toast({ 
         title: 'Timetable generated successfully',
-        description: `${data.assignments} assignments created`
+        description: `${data.assignments} assignments created with ${data.stats?.utilization?.toFixed(1)}% utilization`
       })
-      if (data.skipped?.length > 0) {
+      if (data.warnings?.length > 0) {
         toast({
           title: 'Some classes could not be scheduled',
-          description: `${data.skipped.length} items skipped`,
+          description: `${data.warnings.length} classes skipped due to conflicts`,
           variant: 'destructive'
         })
       }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to generate timetable',
+        description: error.message,
+        variant: 'destructive'
+      })
     }
   })
   
   const reoptimizeMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/solver/reoptimize', { method: 'POST' })
-      if (!response.ok) throw new Error('Failed to re-optimize timetable')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to re-optimize timetable')
+      }
       return response.json()
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['assignments'] })
       toast({ 
-        title: 'Timetable re-optimized',
-        description: `${data.new} new assignments, ${data.locked} kept locked`
+        title: 'Timetable re-optimized successfully',
+        description: `${data.new || 0} assignments updated, ${data.locked || 0} assignments kept locked`
+      })
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to re-optimize timetable',
+        description: error.message,
+        variant: 'destructive'
       })
     }
   })
@@ -103,6 +130,8 @@ export default function TimetablePage() {
       // Cancel any pending refetches
       await queryClient.cancelQueries({ queryKey: ['assignments'] })
       
+      const newLockStatus = !assignment.is_locked
+      
       // Optimistically update the lock status
       queryClient.setQueryData(['assignments'], (old: AssignmentWithRelations[]) => {
         if (!old) return []
@@ -110,7 +139,7 @@ export default function TimetablePage() {
           if (a.offering_id === assignment.offering_id && 
               a.kind === assignment.kind && 
               a.slot_id === assignment.slot_id) {
-            return { ...a, is_locked: !a.is_locked }
+            return { ...a, is_locked: newLockStatus }
           }
           return a
         })
@@ -121,12 +150,28 @@ export default function TimetablePage() {
         assignment.offering_id,
         assignment.kind,
         assignment.slot_id,
-        !assignment.is_locked
+        newLockStatus
       )
+      
+      // Return the new lock status for success handler
+      return newLockStatus
+    },
+    onSuccess: (isLocked) => {
+      toast({
+        title: isLocked ? 'Class locked' : 'Class unlocked',
+        description: isLocked 
+          ? 'This class will not be moved during re-optimization'
+          : 'This class can now be moved during re-optimization'
+      })
     },
     onError: () => {
       // Revert on error
       queryClient.invalidateQueries({ queryKey: ['assignments'] })
+      toast({
+        title: 'Failed to update lock status',
+        description: 'Please try again',
+        variant: 'destructive'
+      })
     }
   })
   
@@ -270,27 +315,24 @@ export default function TimetablePage() {
     try {
       const { assignment, slot_id, room_id } = recommendation
       
-      // Delete old assignment
-      await supabase
+      // Update the assignment directly
+      const { error: updateError } = await supabase
         .from('assignment')
-        .delete()
+        .update({
+          slot_id: slot_id,
+          room_id: room_id
+        })
         .eq('offering_id', assignment.offering_id)
         .eq('kind', assignment.kind)
-        .eq('slot_id', assignment.slot_id)
       
-      // Create new assignment
-      await assignmentsFixed.create({
-        offering_id: assignment.offering_id,
-        slot_id: slot_id,
-        room_id: room_id,
-        kind: assignment.kind,
-        is_locked: true
-      })
+      if (updateError) {
+        throw updateError
+      }
       
-      // Re-optimize
-      await reoptimizeMutation.mutateAsync()
+      // Invalidate queries to refresh the UI
+      await queryClient.invalidateQueries({ queryKey: ['assignments'] })
       
-      toast({ title: 'Recommendation applied and schedule re-optimized' })
+      toast({ title: 'Recommendation applied successfully' })
       setSelectedAssignment(null)
     } catch (error: any) {
       toast({ 
@@ -301,7 +343,148 @@ export default function TimetablePage() {
     }
   }
   
-  const currentViewId = viewType === 'section' ? selectedSectionId : selectedTeacherId
+  const handleExportCSV = () => {
+    try {
+      // Prepare CSV headers
+      const headers = ['Day', 'Time', 'Course Code', 'Course Name', 'Type', 'Room', 'Teacher', 'Section']
+      
+      // Filter assignments based on current view
+      const filteredAssignments = (selectedSectionId === 'all' || selectedTeacherId === 'all')
+        ? assignmentsList // Show all assignments for "all" options
+        : assignmentsList.filter(a => {
+            if (viewType === 'section') {
+              return a.offering?.section?.id === selectedSectionId
+            } else {
+              return a.offering?.teacher?.id === selectedTeacherId
+            }
+          })
+      
+      if (filteredAssignments.length === 0) {
+        toast({
+          title: 'No data to export',
+          description: 'Please select a section or teacher with assignments',
+          variant: 'destructive'
+        })
+        return
+      }
+      
+      // Sort assignments by day and time
+      const sortedAssignments = [...filteredAssignments].sort((a, b) => {
+        const dayOrder = ['MON', 'TUE', 'WED', 'THU', 'FRI']
+        const dayDiff = dayOrder.indexOf(a.slot?.day || '') - dayOrder.indexOf(b.slot?.day || '')
+        if (dayDiff !== 0) return dayDiff
+        return (a.slot?.start_time || '').localeCompare(b.slot?.start_time || '')
+      })
+      
+      // Convert to CSV rows
+      const rows = sortedAssignments.map(a => [
+        a.slot?.day || '',
+        `${a.slot?.start_time || ''} - ${a.slot?.end_time || ''}`,
+        a.offering?.course?.code || '',
+        a.offering?.course?.name || '',
+        a.kind,
+        a.room?.code || 'TBD',
+        a.offering?.teacher?.name || '',
+        a.offering?.section?.name || ''
+      ])
+      
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n')
+      
+      // Download file
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      const fileName = viewType === 'section' 
+        ? selectedSectionId === 'all' 
+          ? 'timetable_all_sections.csv'
+          : `timetable_${sections.find(s => s.id === selectedSectionId)?.name || 'section'}.csv`
+        : selectedTeacherId === 'all'
+          ? 'timetable_all_teachers.csv'  
+          : `timetable_${teachers.find(t => t.id === selectedTeacherId)?.name || 'teacher'}.csv`
+      
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast({
+        title: 'CSV exported successfully',
+        description: `Downloaded as ${fileName}`
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Failed to export CSV',
+        description: error.message,
+        variant: 'destructive'
+      })
+    }
+  }
+  
+  const handleExportPDF = () => {
+    try {
+      if (!currentViewId && selectedSectionId !== 'all' && selectedTeacherId !== 'all') return
+      
+      // Get entity name
+      let entityName = ''
+      if (viewType === 'section') {
+        if (selectedSectionId === 'all') {
+          entityName = 'All Sections'
+        } else {
+          const section = sections.find(s => s.id === selectedSectionId)
+          entityName = section ? `${section.program} Year ${section.year} ${section.name}` : 'Section'
+        }
+      } else {
+        if (selectedTeacherId === 'all') {
+          entityName = 'All Teachers'
+        } else {
+          const teacher = teachers.find(t => t.id === selectedTeacherId)
+          entityName = teacher?.name || 'Teacher'
+        }
+      }
+      
+      // Generate PDF
+      const doc = generateTimetablePDF({
+        assignments: assignmentsList,
+        slots: slotsList,
+        viewType,
+        viewId: currentViewId,
+        entityName
+      })
+      
+      // Download PDF
+      const fileName = viewType === 'section' 
+        ? selectedSectionId === 'all'
+          ? 'timetable_all_sections.pdf'
+          : `timetable_${sections.find(s => s.id === selectedSectionId)?.name || 'section'}.pdf`
+        : selectedTeacherId === 'all'
+          ? 'timetable_all_teachers.pdf'
+          : `timetable_${teachers.find(t => t.id === selectedTeacherId)?.name || 'teacher'}.pdf`
+      
+      doc.save(fileName)
+      
+      toast({
+        title: 'PDF exported successfully',
+        description: `Downloaded as ${fileName}`
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Failed to export PDF',
+        description: error.message,
+        variant: 'destructive'
+      })
+    }
+  }
+  
+  const currentViewId = viewType === 'section' 
+    ? (selectedSectionId === 'all' ? '' : selectedSectionId) 
+    : (selectedTeacherId === 'all' ? '' : selectedTeacherId)
   
   return (
     <div className="min-h-screen p-2 md:p-3 lg:p-4">
@@ -333,14 +516,29 @@ export default function TimetablePage() {
                 <RefreshCw className="mr-1 h-3 w-3" />
                 Re-optimize
               </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                className="border-black text-black hover:bg-gray-100 transition-all text-xs"
-              >
-                <Download className="mr-1 h-3 w-3" />
-                Export
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    disabled={assignmentsList.length === 0}
+                    variant="outline"
+                    size="sm"
+                    className="border-black text-black hover:bg-gray-100 transition-all text-xs"
+                  >
+                    <Download className="mr-1 h-3 w-3" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExportCSV}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <TableIcon className="mr-2 h-4 w-4" />
+                    Export as PDF (Timetable)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -383,6 +581,10 @@ export default function TimetablePage() {
                           <SelectValue placeholder="Select a section" />
                         </SelectTrigger>
                         <SelectContent className="max-h-[200px] overflow-y-auto">
+                          <SelectItem value="all" className="text-xs font-semibold">
+                            All Sections
+                          </SelectItem>
+                          <div className="my-1 border-t" />
                           {sections.map(section => (
                             <SelectItem key={section.id} value={section.id} className="text-xs">
                               {section.name} ({section.program} Year {section.year})
@@ -396,6 +598,10 @@ export default function TimetablePage() {
                           <SelectValue placeholder="Select a teacher" />
                         </SelectTrigger>
                         <SelectContent className="max-h-[200px] overflow-y-auto">
+                          <SelectItem value="all" className="text-xs font-semibold">
+                            All Teachers
+                          </SelectItem>
+                          <div className="my-1 border-t" />
                           {teachers.map(teacher => (
                             <SelectItem key={teacher.id} value={teacher.id} className="text-xs">
                               {teacher.name} ({teacher.code})
@@ -407,19 +613,39 @@ export default function TimetablePage() {
                   </div>
                 </CardHeader>
               <CardContent className="p-2">
-                {currentViewId && (
-                  <TestTimetableGrid
-                    assignments={assignmentsList}
-                    slots={slotsList}
-                    viewType={viewType}
-                    viewId={currentViewId}
-                    selectedAssignment={selectedAssignment}
-                    onDrop={handleDrop}
-                    onToggleLock={(assignment) => toggleLockMutation.mutate(assignment)}
-                    onSelectAssignment={(assignment) => {
-                      setSelectedAssignment(assignment)
-                    }}
-                  />
+                {assignmentsList.length > 0 ? (
+                  <>
+                    {(!currentViewId || selectedSectionId === 'all' || selectedTeacherId === 'all') && (
+                      <Alert className="mb-4">
+                        <AlertDescription>
+                          {selectedSectionId === 'all' 
+                            ? 'Showing timetable for all sections. You can see how all classes are distributed across the week.'
+                            : selectedTeacherId === 'all'
+                            ? 'Showing timetable for all teachers. You can see the overall teaching load distribution.'
+                            : 'Select a section or teacher from the dropdown above to filter the view.'
+                          }
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    <TestTimetableGrid
+                      assignments={assignmentsList}
+                      slots={slotsList}
+                      viewType={viewType}
+                      viewId={currentViewId}
+                      selectedAssignment={selectedAssignment}
+                      onDrop={handleDrop}
+                      onToggleLock={(assignment) => toggleLockMutation.mutate(assignment)}
+                      onSelectAssignment={(assignment) => {
+                        setSelectedAssignment(assignment)
+                      }}
+                    />
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-96">
+                    <p className="text-muted-foreground text-center">
+                      No assignments found. Click "Generate" to create a new timetable.
+                    </p>
+                  </div>
                 )}
                 </CardContent>
               </Card>
