@@ -263,35 +263,67 @@ export class TimetableGenerator {
       })
       return false
     }
-    
+
     const teacher = this.teachers.get(teacherId)
     const teacherPrefs = teacher?.prefs || {}
-    
+
     // Get current teacher schedule to ensure distribution
     const teacherSchedule = this.getTeacherSchedule(teacherId)
-    
+
+    // Track rejection reasons for better error messages
+    let rejectionReasons = {
+      wrongDuration: 0,
+      wrongSlotType: 0,
+      teacherNotAvailable: 0,
+      teacherBusy: 0,
+      teacherWorkloadExceeded: 0,
+      sectionConflict: 0,
+      noRoom: 0
+    }
+
     // Find suitable slot groups
     const suitableGroups = this.slotGroups
       .filter(group => {
         // Check duration
-        if (group.totalDuration !== requiredHours) return false
-        
+        if (group.totalDuration !== requiredHours) {
+          rejectionReasons.wrongDuration++
+          return false
+        }
+
         // Check if slots are appropriate for the kind
-        if (kind === 'P' && !group.slots.every(s => s.is_lab)) return false
-        if (kind !== 'P' && group.slots.some(s => s.is_lab)) return false
-        
+        if (kind === 'P' && !group.slots.every(s => s.is_lab)) {
+          rejectionReasons.wrongSlotType++
+          return false
+        }
+        if (kind !== 'P' && group.slots.some(s => s.is_lab)) {
+          rejectionReasons.wrongSlotType++
+          return false
+        }
+
         // Check teacher availability
-        if (!group.slots.every(s => this.isTeacherAvailable(teacherId, s))) return false
-        
+        if (!group.slots.every(s => this.isTeacherAvailable(teacherId, s))) {
+          rejectionReasons.teacherNotAvailable++
+          return false
+        }
+
         // Check if teacher is busy
-        if (this.isTeacherBusy(teacherId, group.slots)) return false
-        
+        if (this.isTeacherBusy(teacherId, group.slots)) {
+          rejectionReasons.teacherBusy++
+          return false
+        }
+
         // Check teacher workload
-        if (!this.canAssignToTeacher(teacherId, group.slots)) return false
-        
+        if (!this.canAssignToTeacher(teacherId, group.slots)) {
+          rejectionReasons.teacherWorkloadExceeded++
+          return false
+        }
+
         // Check for section conflicts (same section shouldn't have overlapping classes)
-        if (this.hasSectionConflict(offering.section_id, group.slots)) return false
-        
+        if (this.hasSectionConflict(offering.section_id, group.slots)) {
+          rejectionReasons.sectionConflict++
+          return false
+        }
+
         return true
       })
       .sort((a, b) => {
@@ -351,7 +383,7 @@ export class TimetableGenerator {
     // Try to assign to each suitable group
     for (const group of suitableGroups) {
       const room = this.findBestRoom(offering.expected_size || 30, kind, group.slots)
-      
+
       if (room) {
         // Create assignments for all slots in the group
         group.slots.forEach(slot => {
@@ -363,18 +395,37 @@ export class TimetableGenerator {
             is_locked: false
           } as Assignment)
         })
-        
+
         return true
+      } else {
+        rejectionReasons.noRoom++
       }
     }
     
-    // If no suitable slot found
+    // If no suitable slot found, provide detailed reason
+    let reason = 'No suitable slot/room combination found'
+    const teacherLoad = this.getTeacherLoad(teacherId)
+
+    if (rejectionReasons.teacherWorkloadExceeded > 0) {
+      reason = `Teacher max hours exceeded (current: ${teacherLoad.weekly}h/week, max: ${teacher?.max_per_week}h/week)`
+    } else if (rejectionReasons.teacherBusy > 0) {
+      reason = 'Teacher already scheduled in all available slots'
+    } else if (rejectionReasons.sectionConflict > 0) {
+      reason = 'Section has conflicting classes in all available slots'
+    } else if (rejectionReasons.teacherNotAvailable > 0) {
+      reason = 'Teacher not available in any suitable time slots'
+    } else if (rejectionReasons.noRoom > 0) {
+      reason = 'No room with sufficient capacity available'
+    } else if (rejectionReasons.wrongSlotType > 0 && kind === 'P') {
+      reason = 'No lab slots available for practical'
+    }
+
     this.warnings.push({
       offeringId: offering.id,
       kind,
-      reason: 'No suitable slot/room combination found'
+      reason
     })
-    
+
     return false
   }
   
